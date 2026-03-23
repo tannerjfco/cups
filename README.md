@@ -5,7 +5,7 @@ Multiarch docker image for CUPS
 To run in docker command line:
 
 ```
-docker run --name cups -d -p 631:631 --privileged -v /var/run/dbus:/var/run/dbus -v /dev/bus/usb:/dev/bus/usb ghcr.io/tannerjfco/cups
+docker run --name cups -d -p 631:631 --privileged -v /var/run/dbus:/var/run/dbus -v /dev/bus/usb:/dev/bus/usb -v cups-config:/etc/cups ghcr.io/tannerjfco/cups
 ```
 
 To run in docker-compose:
@@ -21,6 +21,7 @@ services:
     volumes:
       - "/var/run/dbus:/var/run/dbus"
       - "/dev/bus/usb:/dev/bus/usb"
+      - "cups-config:/etc/cups"
     privileged: true
     restart: unless-stopped
 ```

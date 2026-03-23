@@ -32,7 +32,11 @@ RUN useradd \
     print
 
 COPY cupsd.conf /etc/cups/cupsd.conf
+RUN cp -a /etc/cups /etc/cups-defaults
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 631
 
-ENTRYPOINT ["/usr/sbin/cupsd", "-f"]
+ENTRYPOINT ["/entrypoint.sh"]

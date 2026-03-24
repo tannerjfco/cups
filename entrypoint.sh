@@ -11,4 +11,6 @@ if [ ! -S /var/run/dbus/system_bus_socket ]; then
   dbus-daemon --system
 fi
 
+avahi-daemon -D
+
 exec /usr/sbin/cupsd -f

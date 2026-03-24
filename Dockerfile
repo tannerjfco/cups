@@ -2,22 +2,26 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    iputils-ping \
-    gpg \
-    vim \
-    locales \
-    whois \
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:openprinting/cups && \
+    apt-get update && apt-get install -y \
+    avahi-daemon \
+    avahi-utils \
     cups \
-    cups-client \
     cups-bsd \
-    printer-driver-all \
-    printer-driver-gutenprint \
-    hpijs-ppds \
+    cups-client \
+    curl \
+    gpg \
     hp-ppd  \
+    hpijs-ppds \
     hplip \
-    printer-driver-foo2zjs
+    iputils-ping \
+    locales \
+    printer-driver-all \
+    printer-driver-foo2zjs \
+    printer-driver-gutenprint \
+    vim \
+    whois
 
 RUN HPLIP_VERSION=$(dpkg -s hplip | grep '^Version:' | awk '{print $2}' | sed 's/+.*//') && \
     case "$(dpkg --print-architecture)" in \

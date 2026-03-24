@@ -1,10 +1,8 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y software-properties-common && \
-    add-apt-repository -y ppa:openprinting/cups && \
-    apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     avahi-daemon \
     avahi-utils \
     cups \

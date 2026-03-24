@@ -19,6 +19,45 @@ RUN apt-get update && apt-get install -y \
     hplip \
     printer-driver-foo2zjs
 
+RUN HPLIP_VERSION=$(dpkg -s hplip | grep '^Version:' | awk '{print $2}' | sed 's/+.*//') && \
+    case "$(dpkg --print-architecture)" in \
+      amd64) HPLIP_ARCH=x86_64 ;; \
+      arm64) HPLIP_ARCH=arm64 ;; \
+      armhf) HPLIP_ARCH=arm32 ;; \
+    esac && \
+    curl -L -o /tmp/hplip-plugin.run \
+      "https://www.openprinting.org/download/printdriver/auxfiles/HP/plugins/hplip-${HPLIP_VERSION}-plugin.run" && \
+    sh /tmp/hplip-plugin.run --noexec --target /tmp/hplip-plugin && \
+    mkdir -p /usr/share/hplip/prnt/plugins \
+             /usr/share/hplip/scan/plugins \
+             /usr/share/hplip/fax/plugins \
+             /usr/share/hplip/data/firmware \
+             /var/lib/hp && \
+    # Print plugins
+    for f in lj hbpl1; do \
+      [ -f /tmp/hplip-plugin/${f}-${HPLIP_ARCH}.so ] && \
+        cp /tmp/hplip-plugin/${f}-${HPLIP_ARCH}.so /usr/share/hplip/prnt/plugins/ && \
+        ln -sf ${f}-${HPLIP_ARCH}.so /usr/share/hplip/prnt/plugins/${f}.so; \
+    done && \
+    # Scan plugins
+    for f in bb_soap bb_soapht bb_marvell bb_escl bb_orblite; do \
+      [ -f /tmp/hplip-plugin/${f}-${HPLIP_ARCH}.so ] && \
+        cp /tmp/hplip-plugin/${f}-${HPLIP_ARCH}.so /usr/share/hplip/scan/plugins/ && \
+        ln -sf ${f}-${HPLIP_ARCH}.so /usr/share/hplip/scan/plugins/${f}.so; \
+    done && \
+    # Fax plugin
+    [ -f /tmp/hplip-plugin/fax_marvell-${HPLIP_ARCH}.so ] && \
+      cp /tmp/hplip-plugin/fax_marvell-${HPLIP_ARCH}.so /usr/share/hplip/fax/plugins/ && \
+      ln -sf fax_marvell-${HPLIP_ARCH}.so /usr/share/hplip/fax/plugins/fax_marvell.so; \
+    chmod -f 755 /usr/share/hplip/prnt/plugins/*.so \
+                  /usr/share/hplip/scan/plugins/*.so \
+                  /usr/share/hplip/fax/plugins/*.so 2>/dev/null; \
+    # All firmware files
+    cp /tmp/hplip-plugin/*.fw.gz /usr/share/hplip/data/firmware/ && \
+    # Mark plugin as installed
+    printf '[plugin]\ninstalled=1\neula=1\nversion=%s\n' "${HPLIP_VERSION}" > /var/lib/hp/hplip.state && \
+    rm -rf /tmp/hplip-plugin /tmp/hplip-plugin.run
+
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
     LANGUAGE=en_US:en

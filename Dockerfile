@@ -19,7 +19,13 @@ RUN apt-get update && apt-get install -y \
     printer-driver-foo2zjs \
     printer-driver-gutenprint \
     vim \
-    whois
+    whois && \
+    locale-gen en_US.UTF-8
+
+RUN sed -i 's/class LocalOpener(urllib_request.URLopener):/class LocalOpener:/' /usr/share/hplip/base/device.py && \
+    sed -i 's/class LocalOpenerEWS_LEDM(urllib_request.URLopener):/class LocalOpenerEWS_LEDM:/' /usr/share/hplip/base/device.py && \
+    sed -i 's/class LocalOpener_LEDM(urllib_request.URLopener):/class LocalOpener_LEDM:/' /usr/share/hplip/base/device.py && \
+    sed -i 's/class LocalOpener_CDM(urllib_request.URLopener):/class LocalOpener_CDM:/' /usr/share/hplip/base/device.py
 
 RUN HPLIP_VERSION=$(dpkg -s hplip | grep '^Version:' | awk '{print $2}' | sed 's/+.*//') && \
     case "$(dpkg --print-architecture)" in \
